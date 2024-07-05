@@ -3,13 +3,16 @@
 #include "linked_list.h"
 
 LinkedList* ll_build(int* keys, size_t size) {
-    if (keys == NULL || size == 0) {
+    LinkedList *llist = malloc(sizeof(LinkedList));
+    if (llist == NULL) {
+        printf("ll_build :: Memory allocation for llist failed. Cannot create a linked list\n");
         return NULL;
     }
 
-    LinkedList *llist = malloc(sizeof(LinkedList));
-    if (llist == NULL) {
-        return NULL;
+    if (keys == NULL || size == 0) {
+        llist->size = 0;
+        llist->head = NULL;
+        return llist;
     }
 
     Node *head        = NULL;
@@ -71,6 +74,7 @@ int ll_prepend(LinkedList* llist, int key) {
 
     Node *new_node = malloc(sizeof(Node));
     if (new_node == NULL) {
+        printf("ll_prepend :: Memory allocation for new_node failed. Cannot prepend a new node to llist.\n");
         return -1;
     }
 
@@ -88,6 +92,7 @@ int ll_append(LinkedList* llist, int key) {
 
     Node *new_node = malloc(sizeof(Node));
     if (new_node == NULL) {
+        printf("ll_append :: Memory allocation for new_node failed. Cannot append a new node to llist.\n");
         return -1;
     }
 
@@ -111,6 +116,7 @@ int ll_push_to(LinkedList *llist, int i, int key) {
     
     Node *new_node = malloc(sizeof(Node));
     if (new_node == NULL) {
+        printf("ll_push_to :: Memory allocation for new_node failed. Cannot push new node to llist.\n");
         return -1;
     }
 
