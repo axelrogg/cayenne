@@ -1,88 +1,62 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include "linked_list.h"
+#include "digraph.h"
 
-typedef struct Digraph {
-    LinkedList **vertices;
-    int num_vertices;
-} Digraph;
-
-
-Digraph* digraph_build(int num_vertices, int num_edges, int edges[][2]) {
-    // We don't allow self-loops
-    for (int i = 0; i < num_edges; i++) {
-        if (edges[i][0] == edges[i][1]) {
-            return NULL;
+int test_incidence_matrix_total_rows_sum(int **matrix, int num_rows, int num_cols) {
+    int total_rows_sum = 0;
+    for (int i = 0; i < num_rows; i++) {
+        int row_sum = 0;
+        for (int j = 0; j < num_cols; j++) {
+            row_sum += matrix[i][j];
         }
+        total_rows_sum += row_sum;
     }
-    LinkedList **vertices = malloc(num_vertices * sizeof(LinkedList *));
-    if (vertices == NULL) {
-        return NULL;
+    if (total_rows_sum != 0) {
+        printf("The element-wise sum of all the rows is %d but should be 0.\n", total_rows_sum);
+        return -1;
     }
-
-    for (int i = 0; i < num_vertices; i++) {
-        vertices[i] = NULL;
-    }
-
-    for (int i = 0; i < num_edges; i++) {
-        if (edges[i][0] == edges[i][1]) {
-            return NULL;
-        }
-    }
-
-    for (int i = 0; i < num_edges; i++) {
-        if (vertices[edges[i][0]] == NULL) {
-            // Create an empty linked list if we haven't been here before
-            int keys[1] = {edges[i][1]};
-            vertices[edges[i][0]] = ll_build(keys, 1);
-        } else {
-            ll_append(vertices[edges[i][0]], edges[i][1]);
-        }
-    }
-
-    Digraph *digraph = malloc(sizeof(Digraph));
-    if (digraph == NULL) {
-        free(vertices);
-        return NULL;
-    }
-
-    digraph->vertices = vertices;
-    digraph->num_vertices = num_vertices;
-    return digraph;
+    return 0;
 }
 
-void digraph_print(Digraph *digraph) {
-    printf("Graph(\n");
-    for (int i = 0; i < digraph->num_vertices; i++) {
-        printf("{%d}: ", i);
-        printf("{");
-        Node *current_node = digraph->vertices[i]->head;
-        while (current_node != NULL) {
-            printf("%d", current_node->key);
-            if (current_node->next != NULL) {
-                printf("->");
-            }
-            current_node = current_node->next;
+int test_incidence_matrix_col_sum(int **matrix, int num_rows, int num_cols) {
+    for (int j = 0; j < num_cols; j++) {
+        int col_value_sum = 0;
+        for (int i = 0; i < num_rows; i++) {
+            col_value_sum += matrix[i][j];
         }
-        printf("}\n");
+        if (col_value_sum != 0) {
+            printf("The sum of the elements in column %d is %d but should be 0.\n", j, col_value_sum);
+            return -1;
+        }
     }
-    printf(")\n");
+    return 0;
 }
+
 
 int main() {
-    int num_vertices = 6;
-    int num_edges = 8;
-    int edges[8][2] = {
+    int num_vertices = 3;
+    int num_edges = 3;
+    int edges[3][2] = {
         {0, 1},
-        {0, 3},
-        {1, 4},
-        {2, 4},
-        {2, 5},
-        {3, 1},
-        {4, 3},
-        {5, 4},
+        {0, 2},
+        {1, 2},
     };
     
     Digraph *digraph = digraph_build(num_vertices, num_edges, edges);
     digraph_print(digraph);
+    printf("Number of edges: %d\n", digraph_num_edges(digraph));
+    int **incidence_matrix = digraph_gen_incidence_matrix(digraph);
+    if (test_incidence_matrix_col_sum(incidence_matrix, num_vertices, num_edges) == -1) {
+        return 1;
+    }
+    if (test_incidence_matrix_total_rows_sum(incidence_matrix, num_vertices, num_edges) == -1) {
+        return 1;
+    }
+    
+
+    for (int i = 0; i < num_vertices; i++) {
+        for (int j = 0; j < num_edges; j++) {
+            printf("Elemento (%d, %d):  %d\n", i, j, incidence_matrix[i][j]);
+        }
+    }
+    digraph_free(digraph);
+    digraph_free_incidence_matrix(incidence_matrix, num_vertices);
 }
