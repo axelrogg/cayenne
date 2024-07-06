@@ -1,4 +1,5 @@
 #include "digraph.h"
+#include "matrix.h"
 
 int test_incidence_matrix_total_rows_sum(int **matrix, int num_rows, int num_cols) {
     int total_rows_sum = 0;
@@ -50,13 +51,8 @@ int main() {
     if (test_incidence_matrix_total_rows_sum(incidence_matrix, num_vertices, num_edges) == -1) {
         return 1;
     }
-    
 
-    for (int i = 0; i < num_vertices; i++) {
-        for (int j = 0; j < num_edges; j++) {
-            printf("Elemento (%d, %d):  %d\n", i, j, incidence_matrix[i][j]);
-        }
-    }
+    matrix_print(incidence_matrix, num_vertices, num_edges);
     digraph_free(digraph);
     digraph_free_incidence_matrix(incidence_matrix, num_vertices);
 }
