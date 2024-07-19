@@ -46,13 +46,6 @@ int **digraph_gen_incidence_matrix(Digraph *digraph) {
     return matrix;
 }
 
-void digraph_free_incidence_matrix(int **matrix, int num_rows) {
-    for (int i = 0; i < num_rows; i++) {
-        free(matrix[i]);
-    }
-    free(matrix);
-}
-
 void digraph_free(Digraph *digraph) {
     for (int i = 0; i < digraph->num_vertices; i++) {
         if (digraph->vertices[i] != NULL) {

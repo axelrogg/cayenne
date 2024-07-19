@@ -1,4 +1,31 @@
+#include <stdlib.h>
 #include "matrix.h"
+
+void mat_free(void** matrix, int num_rows) {
+    if (matrix == NULL) {
+        return;
+    }
+    for (int i = 0; i < num_rows; i++) {
+        free(matrix[i]);
+        matrix[i] = NULL;
+    }
+    free(matrix);
+}
+
+float** mat_matmul(float** A, float** B, int rows_numA, int cols_numA, int cols_numB) {
+    float** result = malloc(rows_numA * sizeof(float*));
+    for (int i = 0; i < rows_numA; i++) {
+         result[i] = malloc(cols_numB * sizeof(float));
+         for (int j = 0; j < cols_numB; j++) {
+            float sum = 0;
+            for (int k = 0; k < rows_numA; k++) {
+                sum += A[i][k] * B[k][j];
+            }
+            result[i][j] = sum;
+        }
+    }
+    return result;
+}
 
 int to_buff(char *buff, size_t buff_size, int offset, const char *format, ...) {
     if (offset > 0 && (size_t)offset >= buff_size) {

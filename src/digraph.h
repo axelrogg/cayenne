@@ -10,10 +10,9 @@ typedef struct Digraph {
 
 Digraph* digraph_build(int num_vertices, int num_edges, int edges[][2]);
 int digraph_num_edges(Digraph *digraph);
-int **digraph_gen_incidence_matrix(Digraph *digraph);
+int **digraph_gen_incidence_matrix(Digraph *digraph); // NOTE: To free the incidence matrix use `mat_free` from "matrix.h"
 void digraph_print(Digraph *digraph);
 void digraph_free(Digraph *digraph);
-void digraph_free_incidence_matrix(int **matrix, int num_rows);
 
 #endif // !DIGRAPH_H
 

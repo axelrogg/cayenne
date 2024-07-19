@@ -54,5 +54,5 @@ int main() {
 
     matrix_print(incidence_matrix, num_vertices, num_edges);
     digraph_free(digraph);
-    digraph_free_incidence_matrix(incidence_matrix, num_vertices);
+    mat_free((void **)incidence_matrix, num_vertices);
 }
