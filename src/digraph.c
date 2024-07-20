@@ -13,7 +13,7 @@ int digraph_num_edges(Digraph *digraph) {
 }
 
 
-int **digraph_gen_incidence_matrix(Digraph *digraph) {
+int** digraph_gen_incidence_matrix(Digraph *digraph) {
     int num_edges = digraph_num_edges(digraph);
     int **matrix = malloc(digraph->num_vertices * sizeof(int*));
     if (matrix == NULL) {

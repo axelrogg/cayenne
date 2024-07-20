@@ -52,7 +52,7 @@ int main() {
         return 1;
     }
 
-    matrix_print(incidence_matrix, num_vertices, num_edges);
+    mat_print(incidence_matrix, num_vertices, num_edges);
     digraph_free(digraph);
     mat_free((void **)incidence_matrix, num_vertices);
 }
