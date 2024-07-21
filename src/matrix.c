@@ -32,54 +32,60 @@ float** mat_matmul(float** A, float** B, int rows_numA, int cols_numA, int cols_
  * @brief Performs LU factorization on a given square matrix `A`
  *
  * This function takes a square nxn matrix `A` and computes its LU factorization,
- * storing the result in a nxn matrix `C`. `mat_lu_factor` uses Crout’s Algorithm
+ * storing the result in a nxn matrix `F`. `mat_luf` uses Crout’s Algorithm
  * to determine L and U, where U is an upper triangular matrix with all the elements
  * on its diagonal equal to 1.
  *
- * It is important to note that the matrix `C` contains information about L and U at
- * the same time. In fact, C = L + U - I, where I is the identity matrix of size `n`.
+ * It is important to note that the matrix `F` contains information about L and U at
+ * the same time. In fact, F = L + U - I, where I is the identity matrix of size `n`.
  *
  * @param A: A pointer to the original matrix A to be factorized.
- * @param n: The dimension of the square matrix A (and C).
- * @param C: A pointer to the matrix C, where the result of the factorization will be
- *           stored. `C` must be pre-allocated and must be of dimensions nxn.
+ * @param n: The dimension of the square matrix A (and F).
+ * @param F: A pointer to the matrix F, where the result of the factorization will be
+ *           stored. `F` must be pre-allocated and must be of dimensions nxn.
  *
  * @return:  Returns `0` if the factorization was successul, or -1 is there was an
- *           error (e.g., if `A` or `C` is `NULL`).
+ *           error (e.g., if `A` or `F` is `NULL`, or if `n` is less than or
+ *           equal to zero).
  *
  * @note:    The function does not check for singularity of matrix A. The caller must
- *           wnsure that `A` is non-singular and well-conditioned before using this
+ *           ensure that `A` is non-singular and well-conditioned before using this
  *           function.
  */
-int mat_luf(float** A, int n, float** C) {
+int mat_luf(float** A, int n, float** F) {
     if (A == NULL) {
-        printf("mat_lu_factorize :: matrix A is NULL.");
+        printf("mat_luf :: matrix A is NULL.");
+        return -1;
+    }
+    if (F == NULL) {
+        printf("mat_luf :: matrix F is NULL.");
+        return -1;
+    }
+    if (n < 0) {
+        printf("mat_luf :: size n of matrices cannot be less than or equal to 0.");
         return -1;
     }
 
-    if (C == NULL) {
-        printf("mat_lu_factorize :: matrix C is NULL.");
-        return -1;
-    }
-
+    // Factorize A into F. Remember that F = L + U - I
     for (int k = 0; k < n; k++) {
         // Move downward within the same column (lower triangular).
         for (int i = k; i < n; i++) {
             float sum = 0;
             for (int t = 0; t < k; t++) {
-                sum += C[i][t] * C[t][k];
+                sum += F[i][t] * F[t][k];
             }
-            C[i][k] = A[i][k] - sum;
+            F[i][k] = A[i][k] - sum;
         }
         // Move to the right within the same row.
         for (int j = k + 1; j < n; j++) {
             float sum = 0;
-            for (int t = 0; t < k - 1; t++) {
-                sum += A[k][t] * A[t][j];
+            for (int t = 0; t < k; t++) {
+                sum += F[k][t] * F[t][j];
             }
-            C[k][j] = (A[k][j] - sum) / C[k][k];
+            F[k][j] = (A[k][j] - sum) / F[k][k];
         }
     }
+
     return 0;
 }
 
