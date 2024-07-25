@@ -1,92 +1,73 @@
 #include <stdlib.h>
 #include "matrix.h"
+#include "utils.h"
 
-void mat_free(void** matrix, int num_rows) {
+
+int mat_init(float **matrix, int rows, int cols) {
     if (matrix == NULL) {
-        return;
+        printf("matrix.c :: mat_init :: matrix is NULL\n");
+        return -1;
     }
-    for (int i = 0; i < num_rows; i++) {
-        free(matrix[i]);
-        matrix[i] = NULL;
-    }
-    free(matrix);
-}
 
-float** mat_matmul(float** A, float** B, int rows_numA, int cols_numA, int cols_numB) {
-    float** result = malloc(rows_numA * sizeof(float*));
-    for (int i = 0; i < rows_numA; i++) {
-         result[i] = malloc(cols_numB * sizeof(float));
-         for (int j = 0; j < cols_numB; j++) {
-            float sum = 0;
-            for (int k = 0; k < rows_numA; k++) {
-                sum += A[i][k] * B[k][j];
-            }
-            result[i][j] = sum;
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = malloc(cols * sizeof(float));
+        if (matrix[i] == NULL) {
+            mat_free(matrix, i);
+            printf("matrix.c :: mat_init :: cannot allocate memory to row %d of matrix.\n", i);
+            return -1;
         }
-    }
-    return result;
-}
-
-
-/**
- * @brief Performs LU factorization on a given square matrix `A`
- *
- * This function takes a square nxn matrix `A` and computes its LU factorization,
- * storing the result in a nxn matrix `F`. `mat_luf` uses Crout’s Algorithm
- * to determine L and U, where U is an upper triangular matrix with all the elements
- * on its diagonal equal to 1.
- *
- * It is important to note that the matrix `F` contains information about L and U at
- * the same time. In fact, F = L + U - I, where I is the identity matrix of size `n`.
- *
- * @param A: A pointer to the original matrix A to be factorized.
- * @param n: The dimension of the square matrix A (and F).
- * @param F: A pointer to the matrix F, where the result of the factorization will be
- *           stored. `F` must be pre-allocated and must be of dimensions nxn.
- *
- * @return:  Returns `0` if the factorization was successul, or -1 is there was an
- *           error (e.g., if `A` or `F` is `NULL`, or if `n` is less than or
- *           equal to zero).
- *
- * @note:    The function does not check for singularity of matrix A. The caller must
- *           ensure that `A` is non-singular and well-conditioned before using this
- *           function.
- */
-int mat_luf(float** A, int n, float** F) {
-    if (A == NULL) {
-        printf("mat_luf :: matrix A is NULL.");
-        return -1;
-    }
-    if (F == NULL) {
-        printf("mat_luf :: matrix F is NULL.");
-        return -1;
-    }
-    if (n < 0) {
-        printf("mat_luf :: size n of matrices cannot be less than or equal to 0.");
-        return -1;
-    }
-
-    // Factorize A into F. Remember that F = L + U - I
-    for (int k = 0; k < n; k++) {
-        // Move downward within the same column (lower triangular).
-        for (int i = k; i < n; i++) {
-            float sum = 0;
-            for (int t = 0; t < k; t++) {
-                sum += F[i][t] * F[t][k];
-            }
-            F[i][k] = A[i][k] - sum;
-        }
-        // Move to the right within the same row.
-        for (int j = k + 1; j < n; j++) {
-            float sum = 0;
-            for (int t = 0; t < k; t++) {
-                sum += F[k][t] * F[t][j];
-            }
-            F[k][j] = (A[k][j] - sum) / F[k][k];
+        for (int j = 0; j < cols; j++) {
+            matrix[i][j] = 0.0;
         }
     }
 
     return 0;
+}
+
+
+int mat_init_randf(float **matrix, int rows, int cols ,float *min, float *max) {
+    float randmin = (min != NULL) ? *min : 0;
+    float randmax = (max != NULL) ? *max : (float)RAND_MAX;
+
+    if (randmin < 0) {
+        printf("matrix.c :: mat_init_randf :: min pointer cannot point to a value less than 0.\n");
+        return -1;
+    }
+    if (randmax > (float)RAND_MAX) {
+        printf("matrix.c :: mat_init_randf :: max pointer cannot point to a value greater than RAND_MAX.\n");
+        return -1;
+    }
+
+    if (matrix == NULL) {
+        return -1;
+    }
+
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = malloc(cols * sizeof(float));
+        if (matrix[i] == NULL) {
+            mat_free(matrix, i);
+            printf("matrix.c :: mat_init_randf :: cannot allocate memory to row %d of matrix.\n", i);
+            return -1;
+        }
+        for (int j = 0; j < cols; j++) {
+            matrix[i][j] = randf(randmin, randmax);
+        }
+    }
+    return 0;
+}
+
+void mat_free(float** matrix, int num_rows) {
+    if (matrix == NULL) {
+        return;
+    }
+    for (int i = 0; i < num_rows; i++) {
+        if (matrix[i] != NULL) {
+            free(matrix[i]);
+            matrix[i] = NULL;
+        }
+    }
+    free(matrix);
+    matrix = NULL;
 }
 
 
@@ -112,6 +93,7 @@ int to_buff(char *buff, size_t buff_size, int offset, const char *format, ...) {
     return num_chars;
 }
 
+
 int append_line_break(char *buff, size_t buff_size, int offset, int num_blocks) {
     int num_chars;
     int new_offset = 0;
@@ -133,6 +115,7 @@ int append_line_break(char *buff, size_t buff_size, int offset, int num_blocks) 
     buff[new_offset++ + offset] = '\n';
     return new_offset;
 }
+
 
 void mat_print(int **matrix, int num_rows, int num_cols) {
     char buff[MAX_BUFFER_SIZE];
@@ -193,3 +176,4 @@ void mat_print(int **matrix, int num_rows, int num_cols) {
 
     printf("%s", buff);
 }
+
