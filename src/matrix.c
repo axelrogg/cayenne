@@ -3,38 +3,37 @@
 #include "utils.h"
 
 
-int mat_init(float **matrix, int rows, int cols) {
+int mat_init_zeroes(double **matrix, int rows, int cols) {
     if (matrix == NULL) {
         printf("matrix.c :: mat_init :: matrix is NULL\n");
         return -1;
     }
 
     for (int i = 0; i < rows; i++) {
-        matrix[i] = malloc(cols * sizeof(float));
+        matrix[i] = malloc(cols * sizeof(double));
         if (matrix[i] == NULL) {
             mat_free(matrix, i);
             printf("matrix.c :: mat_init :: cannot allocate memory to row %d of matrix.\n", i);
             return -1;
         }
         for (int j = 0; j < cols; j++) {
-            matrix[i][j] = 0.0;
+            matrix[i][j] = 0;
         }
     }
-
     return 0;
 }
 
 
-int mat_init_randf(float **matrix, int rows, int cols ,float *min, float *max) {
-    float randmin = (min != NULL) ? *min : 0;
-    float randmax = (max != NULL) ? *max : (float)RAND_MAX;
+int mat_init_drand(double **matrix, int rows, int cols ,double *min, double *max) {
+    double randmin = (min != NULL) ? *min : 0;
+    double randmax = (max != NULL) ? *max : (double)RAND_MAX;
 
     if (randmin < 0) {
-        printf("matrix.c :: mat_init_randf :: min pointer cannot point to a value less than 0.\n");
+        printf("matrix.c :: mat_init_drand :: min pointer cannot point to a value less than 0.\n");
         return -1;
     }
-    if (randmax > (float)RAND_MAX) {
-        printf("matrix.c :: mat_init_randf :: max pointer cannot point to a value greater than RAND_MAX.\n");
+    if (randmax > (double)RAND_MAX) {
+        printf("matrix.c :: mat_init_drand :: max pointer cannot point to a value greater than RAND_MAX.\n");
         return -1;
     }
 
@@ -43,20 +42,21 @@ int mat_init_randf(float **matrix, int rows, int cols ,float *min, float *max) {
     }
 
     for (int i = 0; i < rows; i++) {
-        matrix[i] = malloc(cols * sizeof(float));
+        matrix[i] = malloc(cols * sizeof(double));
         if (matrix[i] == NULL) {
             mat_free(matrix, i);
-            printf("matrix.c :: mat_init_randf :: cannot allocate memory to row %d of matrix.\n", i);
+            printf("matrix.c :: mat_init_drand :: cannot allocate memory to row %d of matrix.\n", i);
             return -1;
         }
         for (int j = 0; j < cols; j++) {
-            matrix[i][j] = randf(randmin, randmax);
+            matrix[i][j] = drand(randmin, randmax);
         }
     }
     return 0;
 }
 
-void mat_free(float** matrix, int num_rows) {
+
+void mat_free(double ** matrix, int num_rows) {
     if (matrix == NULL) {
         return;
     }
