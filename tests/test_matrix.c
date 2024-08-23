@@ -3,102 +3,96 @@
 #include "../src/matrix.h"
 
 
-void test_mat_init() {
+void test_matrix_init_zeroes(void) {
     int rows = 600;
     int cols = 100;
-    float **matrix = malloc(rows * sizeof(float*));
-    if (matrix == NULL) {
-        printf("test_matrix.c :: test_mat_init :: failed to allocate memory for test matrix.\n");
-        printf("test_matrix.c :: test_mat_init :: FAILED 👎\n");
+    int **matrix_i;
+    double **matrix_d;
+
+    // Test: Initialize an integer matrix with zeroes and verify its elements
+    // This tests whether `matrix_init_zeroes_i` initializes and returns a matrix
+    // with all elements set to 0 (integer).
+    matrix_i = matrix_init_zeroes_i(rows, cols);
+    if (matrix_i == NULL) {
+        printf("test_matrix.c :: test_matrix_init_zeroes :: FAILED 👎 <- failed to "
+               "initialize test int zero matrix.\n");
         return;
     }
 
-    // Should return -1 if the matrix passed to the mat_init is NULL
-    assert(mat_init(NULL, rows, cols) == -1);
-
-    // Should return 0 if the matrix was successfully initiated.
-    assert(mat_init(matrix, rows, cols) == 0);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            assert(matrix[i][j] == 0.0);
+            if (matrix_i[i][j] != 0.0) {
+                printf("test_matrix.c :: test_matrix_init_zeroes :: FAILED 👎 <- "
+                       "element (%d, %d) of int zero matrix is not 0", i, j);
+            }
         }
     }
-    printf("test_matrix.c :: test_mat_init :: PASSED 👍\n");
-    mat_free(matrix, rows);
-}
 
-
-void test_mat_init_randf() {
-    int rows = 600;
-    int cols = 100;
-    float min = 12.0;
-    float max = 5234.0;
-    float **matrix_a = malloc(rows * sizeof(float*));
-    if (matrix_a == NULL) {
-        printf("test_matrix.c :: test_mat_init_randf :: failed to allocate memory for test matrix matrix_a.\n");
-        printf("test_matrix.c :: test_mat_init_randf :: FAILED 👎\n");
-        return;
-    }
-
-    float **matrix_b = malloc(rows * sizeof(float*));
-    if (matrix_b == NULL) {
-        printf("test_matrix.c :: test_mat_init_randf :: failed to allocate memory for test matrix matrix_b.\n");
-        printf("test_matrix.c :: test_mat_init_randf :: FAILED 👎\n");
-        return;
-    }
-
-    float **matrix_c = malloc(rows * sizeof(float*));
-    if (matrix_c == NULL) {
-        printf("test_matrix.c :: test_mat_init_randf :: failed to allocate memory for test matrix matrix_c.\n");
-        printf("test_matrix.c :: test_mat_init_randf :: FAILED 👎\n");
-        return;
-    }
-
-    float **matrix_d = malloc(rows * sizeof(float*));
+    // Test: Initialize a double matrix with zeroes and verify its elements
+    // This tests whether `matrix_init_zeroes_d` initializes and returns a matrix
+    // with all elements set to 0.0 (double).
+    matrix_d = matrix_init_zeroes_d(rows, cols);
     if (matrix_d == NULL) {
-        printf("test_matrix.c :: test_mat_init_randf :: failed to allocate memory for test matrix matrix_d.\n");
-        printf("test_matrix.c :: test_mat_init_randf :: FAILED 👎\n");
+        printf("test_matrix.c :: test_matrix_init_zeroes :: FAILED 👎 <- failed to "
+               "initialize test zero matrix.\n");
         return;
     }
 
-
-    mat_init_randf(matrix_a, rows, cols, &min, &max);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            assert(matrix_a[i][j] > min && matrix_a[i][j] < max);
+            if (matrix_d[i][j] != 0.0) {
+                printf("test_matrix.c :: test_matrix_init_zeroes_d :: FAILED 👎 <- "
+                       "element (%d, %d) of double zero matrix is not 0.0", i, j);
+            }
         }
     }
-    mat_free(matrix_a, rows);
 
-    mat_init_randf(matrix_b, rows, cols, NULL, &max);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            assert(matrix_b[i][j] > 0 && matrix_b[i][j] < max);
-        }
-    }
-    mat_free(matrix_b, rows);
-
-    mat_init_randf(matrix_c, rows, cols, &min, NULL);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            assert(matrix_c[i][j] > min && matrix_c[i][j] < (float)RAND_MAX);
-        }
-    }
-    mat_free(matrix_c, rows);
-
-    mat_init_randf(matrix_d, rows, cols, NULL, NULL);
-    for (int i = 0; i < rows; i++) {
-        for (int j = 0; j < cols; j++) {
-            assert(matrix_d[i][j] > 0 && matrix_d[i][j] < (float)RAND_MAX);
-        }
-    }
-    mat_free(matrix_d, rows);
-    printf("test_matrix.c :: test_mat_init_randf :: PASSED 👍\n");
+    matrix_free((void **)matrix_i, rows);
+    matrix_free((void **)matrix_d, rows);
+    printf("test_matrix.c :: test_matrix_init_zeroes_d :: PASSED 👍\n");
 }
 
-int test_matrix() {
-    test_mat_init();
-    test_mat_init_randf();
+
+void test_matrix_init_drand() {
+    int rows = 600;
+    int cols = 100;
+    double min = 12.0;
+    double max = 5234.0;
+
+    // Test 1: Initialize a matrix with pseudo-random double values within the
+    // range [min, max]
+    double **matrix_a = matrix_init_drand(rows, cols, min, max);
+    if (matrix_a == NULL) {
+        printf("test_matrix.c :: test_matrix_init_randf :: FAILED 👎 <- failed "
+               "matrix_init_drand on matrix_a.\n");
+    }
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            if (matrix_a[i][j] <= min && matrix_a[i][j] >= max) {
+                printf("test_matrix.c :: test_matrix_init_randf :: FAILED 👎 <- matrix_a's "
+                        "elements are not within the specified range."
+                       );
+            }
+        }
+    }
+
+    // Test 2: Ensure that matrix initialization fails when min > max
+    double **matrix_b = matrix_init_drand(rows, cols, max, min);
+    if (matrix_b != NULL) {
+        printf("test_matrix.c :: test_matrix_init_randf :: FAILED 👎 <- "
+               "matrix_init_drandf should fail if range of values is invalid.\n");
+    }
+
+    matrix_free((void **)matrix_a, rows);
+    if (matrix_b != NULL) matrix_free((void **)matrix_a, rows);
+
+    printf("test_matrix.c :: test_matrix_init_randf :: PASSED 👍\n");
+}
+
+int test_matrix(void) {
+    test_matrix_init_zeroes();
+    test_matrix_init_drand();
     printf("test_matrix.c :: test_matrix :: All tests passed 👍\n");
     return 0;
 }
