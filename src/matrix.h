@@ -2,14 +2,17 @@
 #define MATRIX_H
 
 #include <stdarg.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
 #define MAX_BUFFER_SIZE 500
 
-int mat_init_zeroes(double **matrix, int rows, int cols);
-int mat_init_drand(double **matrix, int rows, int cols, double *min, double *max);
-void mat_print(int **matrix, int num_rows, int num_cols);
-void mat_free(double **matrix, int num_rows);
+int **matrix_init_zeroes_i(int rows, int cols);
+double **matrix_init_zeroes_d(int rows, int cols);
+double **matrix_init_drand(int rows, int cols, double min, double max);
+int matrix_dfill(double **matrix, int rows, int cols,
+                 double values[rows][cols]);
+void matrix_print(int **matrix, int num_rows, int num_cols);
+void matrix_free(void **matrix, int num_rows);
 
 #endif // !MATRIX_H

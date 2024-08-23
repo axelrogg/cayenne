@@ -1,62 +1,94 @@
-#include <stdlib.h>
 #include "matrix.h"
 #include "utils.h"
+#include <stdlib.h>
 
-
-int mat_init_zeroes(double **matrix, int rows, int cols) {
-    if (matrix == NULL) {
-        printf("matrix.c :: mat_init :: matrix is NULL\n");
+int matrix_dfill(double **matrix, int rows, int cols,
+                 double values[rows][cols]) {
+    if (matrix == NULL || values == NULL || rows <= 0 || cols <= 0)
         return -1;
+
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++)
+            matrix[i][j] = values[i][j];
+    }
+    return 0;
+}
+
+int **matrix_init_zeroes_i(int rows, int cols) {
+    int **matrix = malloc(rows * sizeof(int *));
+    if (matrix == NULL) {
+        printf("matrix.c :: matrix_init_zeroes_i :: matrix is NULL\n");
+        return NULL;
     }
 
     for (int i = 0; i < rows; i++) {
-        matrix[i] = malloc(cols * sizeof(double));
+        matrix[i] = malloc(cols * sizeof(int));
         if (matrix[i] == NULL) {
-            mat_free(matrix, i);
-            printf("matrix.c :: mat_init :: cannot allocate memory to row %d of matrix.\n", i);
-            return -1;
+            matrix_free((void **)matrix, i);
+            printf("matrix.c :: matrix_init_zeroes_i :: cannot allocate memory "
+                   "to row %d of matrix.\n",
+                   i);
+            return NULL;
         }
         for (int j = 0; j < cols; j++) {
             matrix[i][j] = 0;
         }
     }
-    return 0;
+    return matrix;
 }
 
-
-int mat_init_drand(double **matrix, int rows, int cols ,double *min, double *max) {
-    double randmin = (min != NULL) ? *min : 0;
-    double randmax = (max != NULL) ? *max : (double)RAND_MAX;
-
-    if (randmin < 0) {
-        printf("matrix.c :: mat_init_drand :: min pointer cannot point to a value less than 0.\n");
-        return -1;
-    }
-    if (randmax > (double)RAND_MAX) {
-        printf("matrix.c :: mat_init_drand :: max pointer cannot point to a value greater than RAND_MAX.\n");
-        return -1;
-    }
-
+double **matrix_init_zeroes_d(int rows, int cols) {
+    double **matrix = malloc(rows * sizeof(double *));
     if (matrix == NULL) {
-        return -1;
+        printf("matrix.c :: matrix_init_zeroes_d :: matrix is NULL\n");
+        return NULL;
     }
 
     for (int i = 0; i < rows; i++) {
         matrix[i] = malloc(cols * sizeof(double));
         if (matrix[i] == NULL) {
-            mat_free(matrix, i);
-            printf("matrix.c :: mat_init_drand :: cannot allocate memory to row %d of matrix.\n", i);
-            return -1;
+            matrix_free((void **)matrix, i);
+            printf("matrix.c :: matrix_init_zeroes_d :: cannot allocate memory "
+                   "to row %d of matrix.\n",
+                   i);
+            return NULL;
         }
         for (int j = 0; j < cols; j++) {
-            matrix[i][j] = drand(randmin, randmax);
+            matrix[i][j] = 0;
         }
     }
-    return 0;
+    return matrix;
 }
 
+double **matrix_init_drand(int rows, int cols, double min, double max) {
+    if (min > max) {
+        printf("matrix.c :: matrix_init_drand :: invalid range; min is not "
+               "less than max\n");
+        return NULL;
+    }
 
-void mat_free(double ** matrix, int num_rows) {
+    double **matrix = malloc(rows * sizeof(double *));
+    if (matrix == NULL) {
+        printf("matrix.c :: matrix_init_drand :: matrix is NULL.\n");
+        return NULL;
+    }
+    for (int i = 0; i < rows; i++) {
+        matrix[i] = malloc(cols * sizeof(double));
+        if (matrix[i] == NULL) {
+            matrix_free((void **)matrix, i);
+            printf("matrix.c :: matrix_init_drand :: cannot allocate memory to "
+                   "row %d of matrix.\n",
+                   i);
+            return NULL;
+        }
+        for (int j = 0; j < cols; j++) {
+            matrix[i][j] = drand(min, max);
+        }
+    }
+    return matrix;
+}
+
+void matrix_free(void **matrix, int num_rows) {
     if (matrix == NULL) {
         return;
     }
@@ -69,7 +101,6 @@ void mat_free(double ** matrix, int num_rows) {
     free(matrix);
     matrix = NULL;
 }
-
 
 int to_buff(char *buff, size_t buff_size, int offset, const char *format, ...) {
     if (offset > 0 && (size_t)offset >= buff_size) {
@@ -84,17 +115,17 @@ int to_buff(char *buff, size_t buff_size, int offset, const char *format, ...) {
     if (num_chars < 0) {
         printf("to_buff :: An output error was encountered.\n");
         return -1;
-    // `num_chars` is already greater than or equal to zero, so casting
-    // it to a `size_t` is not a problem.
-    } else if ((size_t)num_chars >= buff_size - offset) { 
+        // `num_chars` is already greater than or equal to zero, so casting
+        // it to a `size_t` is not a problem.
+    } else if ((size_t)num_chars >= buff_size - offset) {
         printf("to_buff :: Output was truncated.\n");
         return -1;
     }
     return num_chars;
 }
 
-
-int append_line_break(char *buff, size_t buff_size, int offset, int num_blocks) {
+int append_line_break(char *buff, size_t buff_size, int offset,
+                      int num_blocks) {
     int num_chars;
     int new_offset = 0;
     num_chars = to_buff(buff, buff_size, offset, "----");
@@ -102,7 +133,7 @@ int append_line_break(char *buff, size_t buff_size, int offset, int num_blocks) 
         return -1;
     }
     new_offset += num_chars;
-    
+
     for (int i = 0; i < num_blocks; i++) {
         num_chars = to_buff(buff, buff_size, new_offset + offset, "+----");
         if (num_chars == -1) {
@@ -116,8 +147,7 @@ int append_line_break(char *buff, size_t buff_size, int offset, int num_blocks) 
     return new_offset;
 }
 
-
-void mat_print(int **matrix, int num_rows, int num_cols) {
+void matrix_print(int **matrix, int num_rows, int num_cols) {
     char buff[MAX_BUFFER_SIZE];
     int offset = 0;
     int num_chars;
@@ -127,12 +157,11 @@ void mat_print(int **matrix, int num_rows, int num_cols) {
         return;
     }
     offset += num_chars;
-    
+
     for (int i = 0; i < num_cols; i++) {
         if (i < 10) {
             num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "|  %d ", i);
-        }
-        else {
+        } else {
             num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "| %d ", i);
         }
         if (num_chars == -1) {
@@ -154,10 +183,11 @@ void mat_print(int **matrix, int num_rows, int num_cols) {
 
         for (int j = 0; j < num_cols; j++) {
             if (matrix[i][j] >= 0) {
-                num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "|  %d ", matrix[i][j]);
-            }
-            else {
-                num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "| %d ", matrix[i][j]);
+                num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "|  %d ",
+                                    matrix[i][j]);
+            } else {
+                num_chars = to_buff(buff, MAX_BUFFER_SIZE, offset, "| %d ",
+                                    matrix[i][j]);
             }
             if (num_chars == -1) {
                 return;
@@ -176,4 +206,3 @@ void mat_print(int **matrix, int num_rows, int num_cols) {
 
     printf("%s", buff);
 }
-
